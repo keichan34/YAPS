@@ -44,6 +44,14 @@ defmodule Yaps.Adapters.Apns do
     pool_name = conn.__apns__(:pool_name)
     {pool_opts, worker_opts} = Dict.split(opts, [:size, :max_overflow])
 
+    pool_opts = pool_opts
+      |> Keyword.update(:size, 5, &String.to_integer(&1))
+      |> Keyword.update(:max_overflow, 10, &String.to_integer(&1))
+
+    pool_opts = [
+      name: {:local, pool_name},
+      worker_module: Worker ] ++ pool_opts
+
     {pool_opts, worker_opts}
   end
 

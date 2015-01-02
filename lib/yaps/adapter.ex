@@ -20,11 +20,11 @@ defmodule Yaps.Adapter do
   Returns `{:error, {:already_started, pid}}` if the repo already
   started or `{:error, term}` in case anything else goes wrong.
   """
-  defcallback start_link(Yaps.Repo.t, Keyword.t) ::
+  defcallback start_link(Yaps.PushBackend.t, Keyword.t) ::
               {:ok, pid} | :ok | {:error, {:already_started, pid}} | {:error, term}
 
   @doc """
   Stops any connection pooling or supervision started with `start_link/1`.
   """
-  defcallback stop(Yaps.Repo.t) :: :ok
+  defcallback stop(Yaps.PushBackend.t) :: :ok
 end

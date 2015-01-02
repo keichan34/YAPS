@@ -30,7 +30,7 @@ defmodule Yaps.Mixfile do
 
   defp description do
     """
-    Yet Another Push-message Scheduler
+    Yet Another Push-message Scheduler / Sender
     """
   end
 

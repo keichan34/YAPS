@@ -1,7 +1,7 @@
 defmodule Yaps.Adapters.Apns.Worker do
   use GenServer
 
-  @timeout 60
+  @timeout :infinity
 
   def start(args) do
     GenServer.start(__MODULE__, args)
@@ -14,7 +14,21 @@ defmodule Yaps.Adapters.Apns.Worker do
   ## GEN_SERVER LIFECYCLE ##
 
   def init(opts) do
-    {:ok, conn} = :ssl.connect opts[:apns_gateway], opts[:apns_port], %{}, @timeout
+    opts = default_options(opts[:env] || :prod, opts)
+
+    {ssl_options, _} = Keyword.split(opts, [
+      :cert,
+      :certfile,
+      :key,
+      :keyfile,
+      :password
+    ])
+
+    {:ok, conn} = :ssl.connect \
+      to_char_list(opts[:apns_gateway]),
+      opts[:apns_port],
+      ssl_options,
+      @timeout
 
     {:ok, Map.merge(new_state, %{conn: conn})}
   end
@@ -23,12 +37,30 @@ defmodule Yaps.Adapters.Apns.Worker do
     {_, _, pid} = conn
     if conn &&
       Process.alive?(pid) &&
-      {:ok, _} == :ssl.connection_info(conn) do
+      ({:ok, _} = :ssl.connection_info(conn)) do
       :ssl.close conn
     end
   end
 
   defp new_state do
     %{conn: nil}
+  end
+
+  defp default_options(:dev, opts) do
+    Keyword.merge(opts, [
+      apns_gateway:  "gateway.sandbox.push.apple.com",
+      apns_port:     2195,
+      feedback_host: "feedback.sandbox.push.apple.com",
+      feedback_port: 2196
+    ])
+  end
+
+  defp default_options(:prod, opts) do
+    Keyword.merge(opts, [
+      apns_gateway:  "gateway.push.apple.com",
+      apns_port:     2195,
+      feedback_host: "feedback.push.apple.com",
+      feedback_port: 2196
+    ])
   end
 end
