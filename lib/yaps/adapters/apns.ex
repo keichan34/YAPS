@@ -19,29 +19,37 @@ defmodule Yaps.Adapters.Apns do
   end
 
   @doc false
-  def start_link(conn, opts) do
-    {pool_opts, worker_opts} = prepare_start(conn, opts)
+  def start_link(backend, opts) do
+    {pool_opts, worker_opts} = prepare_start(backend, opts)
     :poolboy.start_link(pool_opts, worker_opts)
   end
 
   @doc false
-  def stop(conn) do
-    pool = conn_pool(conn)
+  def stop(backend) do
+    pool = backend_pool(backend)
     :poolboy.stop(pool)
   end
 
-  defp conn_pool(conn) do
-    pid = conn.__apns__(:pool_name) |> Process.whereis
+  @doc false
+  def send_push(backend, recipient, payload, opts \\ []) do
+    pool = backend_pool(backend)
+    use_worker(pool, :infinity, fn worker ->
+      Worker.send_push(worker, recipient, payload, opts)
+    end)
+  end
+
+  defp backend_pool(backend) do
+    pid = backend.__apns__(:pool_name) |> Process.whereis
 
     if is_nil(pid) or not Process.alive?(pid) do
-      raise ArgumentError, message: "conn #{inspect conn} is not started"
+      raise ArgumentError, message: "backend #{inspect backend} is not started"
     end
 
     pid
   end
 
-  defp prepare_start(conn, opts) do
-    pool_name = conn.__apns__(:pool_name)
+  defp prepare_start(backend, opts) do
+    pool_name = backend.__apns__(:pool_name)
     {pool_opts, worker_opts} = Dict.split(opts, [:size, :max_overflow])
 
     pool_opts = pool_opts

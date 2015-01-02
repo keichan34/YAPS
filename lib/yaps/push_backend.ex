@@ -79,6 +79,16 @@ defmodule Yaps.PushBackend do
         Yaps.PushBackend.Backend.stop(__MODULE__, unquote(adapter))
       end
 
+      def send_push(recipient, payload, opts \\ []) do
+        Yaps.PushBackend.Backend.send_push(
+          __MODULE__,
+          unquote(adapter),
+          recipient,
+          payload,
+          opts
+        )
+      end
+
       def adapter do
         unquote(adapter)
       end
@@ -106,6 +116,11 @@ defmodule Yaps.PushBackend do
   Stops any connection pooling or supervision started with `start_link/1`.
   """
   defcallback stop() :: :ok
+
+  @doc """
+  Sends a push notification.
+  """
+  defcallback send_push(Bitstring, Bitstring, Keyword.t) :: :ok | {:error, term}
 
   @doc """
   Returns the adapter this backend is configured to use.

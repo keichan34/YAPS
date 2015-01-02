@@ -8,4 +8,8 @@ defmodule Yaps.PushBackend.Backend do
   def stop(backend, adapter) do
     adapter.stop(backend)
   end
+
+  def send_push(backend, adapter, recipient, payload, opts) do
+    adapter.send_push(backend, recipient, payload, opts)
+  end
 end

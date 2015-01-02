@@ -1,6 +1,8 @@
 defmodule Yaps.Adapters.Apns.Worker do
   use GenServer
 
+  alias Yaps.Adapters.Apns.DataTransformers
+
   @timeout :infinity
 
   def start(args) do
@@ -9,6 +11,10 @@ defmodule Yaps.Adapters.Apns.Worker do
 
   def start_link(args) do
     GenServer.start_link(__MODULE__, args)
+  end
+
+  def send_push(worker, recipient, payload, opts \\ []) do
+    GenServer.call(worker, {:send_push, recipient, payload, opts})
   end
 
   ## GEN_SERVER LIFECYCLE ##
@@ -31,6 +37,16 @@ defmodule Yaps.Adapters.Apns.Worker do
       @timeout
 
     {:ok, Map.merge(new_state, %{conn: conn})}
+  end
+
+  def handle_call({:send_push, recipient, payload, opts}, %{conn: conn} = s) do
+    data = DataTransformers.encode(recipient, payload, opts)
+    case :ssl.send(conn, data) do
+      {:error, reason} ->
+        raise "SSL Error: #{inspect reason}"
+      :ok ->
+    end
+    {:reply, :ok, s}
   end
 
   def terminate(_reason, %{conn: conn}) do

@@ -27,4 +27,9 @@ defmodule Yaps.Adapter do
   Stops any connection pooling or supervision started with `start_link/1`.
   """
   defcallback stop(Yaps.PushBackend.t) :: :ok
+
+  @doc """
+  Sends a push notification.
+  """
+  defcallback send_push(Yaps.PushBackend.t, recipient :: binary, payload :: Map.t) :: :ok
 end
