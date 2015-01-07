@@ -1,6 +1,8 @@
 defmodule Yaps.Adapters.Apns.DataTransformers do
   @max_payload_size 2048
 
+  import Yaps.Adapters.Apns.BinaryUtils
+
   def encode(recipient, payload, opts) do
     {opts, _} = Keyword.split(opts, [
       :device_token, :payload, :identifier, :expiration, :priority
@@ -15,31 +17,31 @@ defmodule Yaps.Adapters.Apns.DataTransformers do
       acc <> encode_atom(atom, value)
     end)
 
-    << 2 :: big-unsigned-8, byte_size(frame_data) :: big-unsigned-32 >> <> \
+    << 2 :: bytes(1), byte_size(frame_data) :: bytes(4) >> <> \
     frame_data
   end
 
   defp encode_atom(:device_token, value) when byte_size(value) == 32 do
-    << 1 :: big-unsigned-8, 32 :: big-unsigned-16 >> <> value
+    << 1 :: bytes(1), 32 :: bytes(2) >> <> value
   end
 
   defp encode_atom(:payload, value) when byte_size(value) <= @max_payload_size do
-    << 2 :: big-unsigned-8, byte_size(value) :: big-unsigned-16 >> <> value
+    << 2 :: bytes(1), byte_size(value) :: bytes(2) >> <> value
   end
 
   defp encode_atom(:identifier, value) when byte_size(value) == 4 do
-    << 3 :: big-unsigned-8, 4 :: big-unsigned-16 >> <> value
+    << 3 :: bytes(1), 4 :: bytes(2) >> <> value
   end
 
   defp encode_atom(:expiration, value) when is_integer(value) do
-    << 4 :: big-unsigned-8, 4 :: big-unsigned-16, value :: big-unsigned-32 >>
+    << 4 :: bytes(1), 4 :: bytes(2), value :: big-unsigned-32 >>
   end
 
   defp encode_atom(:priority, :immediate) do
-    << 5 :: big-unsigned-8, 1 :: big-unsigned-16, 10 :: big-unsigned-8 >>
+    << 5 :: bytes(1), 1 :: bytes(2), 10 :: bytes(1) >>
   end
   defp encode_atom(:priority, :efficient) do
-    << 5 :: big-unsigned-8, 1 :: big-unsigned-16, 5 :: big-unsigned-8 >>
+    << 5 :: bytes(1), 1 :: bytes(2), 5 :: bytes(1) >>
   end
 
   defp encode_atom(command, _) do

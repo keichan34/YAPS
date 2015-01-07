@@ -57,7 +57,6 @@ defmodule Yaps.Adapters.Apns.Worker do
       Keyword.put(:identifier, ident)
 
     data = DataTransformers.encode(recipient, payload, opts)
-    IO.puts Hexate.encode(data)
     case :ssl.send(conn, data) do
       {:error, reason} ->
         raise "SSL Error: #{inspect reason}"
