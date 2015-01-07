@@ -20,27 +20,26 @@ defmodule Yaps.Adapters.Apns.DataTransformers do
   end
 
   defp encode_atom(:device_token, value) when byte_size(value) == 32 do
-    << 1 :: big-unsigned-8, 32 :: big-unsigned-32 >> <> value
+    << 1 :: big-unsigned-8, 32 :: big-unsigned-16 >> <> value
   end
 
   defp encode_atom(:payload, value) when byte_size(value) <= @max_payload_size do
-    << 2 :: big-unsigned-8, byte_size(value) :: big-unsigned-32 >> <> value
+    << 2 :: big-unsigned-8, byte_size(value) :: big-unsigned-16 >> <> value
   end
 
-  defp encode_atom(:identifier, value) when byte_size(value) <= 8 do
-    pad = (8 - byte_size(value)) * 8
-    << 3 :: big-unsigned-8, 4 :: big-unsigned-32 >> <> pad <> value
+  defp encode_atom(:identifier, value) when byte_size(value) == 4 do
+    << 3 :: big-unsigned-8, 4 :: big-unsigned-16 >> <> value
   end
 
   defp encode_atom(:expiration, value) when is_integer(value) do
-    << 4 :: big-unsigned-8, 4 :: big-unsigned-32, value :: big-unsigned-32 >>
+    << 4 :: big-unsigned-8, 4 :: big-unsigned-16, value :: big-unsigned-32 >>
   end
 
   defp encode_atom(:priority, :immediate) do
-    << 5 :: big-unsigned-8, 1 :: big-unsigned-32, 10 :: big-unsigned-8 >>
+    << 5 :: big-unsigned-8, 1 :: big-unsigned-16, 10 :: big-unsigned-8 >>
   end
   defp encode_atom(:priority, :efficient) do
-    << 5 :: big-unsigned-8, 1 :: big-unsigned-32, 5 :: big-unsigned-8 >>
+    << 5 :: big-unsigned-8, 1 :: big-unsigned-16, 5 :: big-unsigned-8 >>
   end
 
   defp encode_atom(command, _) do

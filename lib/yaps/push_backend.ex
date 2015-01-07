@@ -72,11 +72,11 @@ defmodule Yaps.PushBackend do
       end
 
       def start_link do
-        Yaps.PushBackend.Backend.start_link(__MODULE__, unquote(adapter))
+        unquote(adapter).start_link(__MODULE__, conf)
       end
 
       def stop do
-        Yaps.PushBackend.Backend.stop(__MODULE__, unquote(adapter))
+        unquote(adapter).stop(__MODULE__)
       end
 
       def send_push(recipient, payload, opts \\ []) do

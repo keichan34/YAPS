@@ -25,6 +25,7 @@ defmodule Yaps.Mixfile do
   defp deps do
     [{:ex_doc, only: :dev},
      {:earmark, only: :dev},
+     {:hexate,  ">= 0.5.0"},
      {:poolboy, "~> 1.4.1"}]
   end
 
