@@ -1,0 +1,2 @@
+defmodule Yaps do
+end

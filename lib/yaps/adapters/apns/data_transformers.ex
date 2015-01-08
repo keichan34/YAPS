@@ -1,8 +1,16 @@
 defmodule Yaps.Adapters.Apns.DataTransformers do
+  @moduledoc """
+  Formats push notification payloads into the binary format as defined by:
+  https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/CommunicatingWIthAPS.html#//apple_ref/doc/uid/TP40008194-CH101-SW6
+  """
+
   @max_payload_size 2048
 
   import Yaps.Adapters.Apns.BinaryUtils
 
+  @doc """
+  Encode the notification.
+  """
   def encode(recipient, payload, opts) do
     {opts, _} = Keyword.split(opts, [
       :device_token, :payload, :identifier, :expiration, :priority
@@ -19,6 +27,10 @@ defmodule Yaps.Adapters.Apns.DataTransformers do
 
     << 2 :: bytes(1), byte_size(frame_data) :: bytes(4) >> <> \
     frame_data
+  end
+
+  defp encode_atom(:device_token, value) when byte_size(value) == 64 do
+    encode_atom :device_token, Hexate.decode(value)
   end
 
   defp encode_atom(:device_token, value) when byte_size(value) == 32 do

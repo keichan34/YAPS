@@ -7,12 +7,9 @@ defmodule Yaps.Mixfile do
      elixir: "~> 1.0",
      deps: deps,
      build_per_environment: false,
-     name: "YAPS",
+     name: "Yaps",
      source_url: "https://github.com/keichan34/yaps",
-     docs: fn ->
-       {ref, 0} = System.cmd("git", ["rev-parse", "--verify", "--quiet", "HEAD"])
-       [source_ref: ref, main: "README", readme: true]
-     end,
+     homepage_url: "https://github.com/keichan34/yaps",
      description: description,
      package: package]
   end
